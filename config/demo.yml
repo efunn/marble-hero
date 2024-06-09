@@ -1,0 +1,30 @@
+# default config for marble game demo
+
+# colors [r,g,b]; 1 = white, -1 = black
+bg_color: [-0.8,-0.8,-0.8]
+cue_color: [0.3,0.3,0.3]
+marble_color: [0.3,0.3,0.6]
+marble_border_color: [0.0,0.0,0.6]
+marble_shadow_color: [-0.2,-0.2,-0.2]
+trough_color: [0.6,0.6,0.6]
+trough_edge_color: [0.1,0.1,0.1]
+trough_line_color: [0.45,0.45,0.45]
+course_color: [0.6,0.6,0.6]
+
+# screen dimensions
+screen_width: 1280 #1920 # pixels
+screen_height: 720 #1080 # pixels
+
+# positions
+trough_width: 0.75 # screen heights 
+trough_edge_width: 0.04 # screen heights
+trough_full_angle: 90 # degrees
+marble_base_ypos: -0.35 # screen heights
+marble_rad: 0.03 # screen heights
+
+# speeds
+trough_speed: 0.25 # screen heights/sec
+marble_input_accel: 50 # degrees/sec/sec
+marble_gravity_accel: 2 # (degrees/sec/sec)/degree
+marble_friction: 0.5 # (degrees/sec)/(degrees/sec)
+marble_rota_coef: 1 # angular velocity coefficient
