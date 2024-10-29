@@ -4,10 +4,9 @@ from scipy.interpolate import PchipInterpolator as pci
 from psychopy import core, event, visual
 from psychopy.iohub.client import launchHubServer
 from psychopy.visual.windowwarp import Warper
-from keyboard import *
 
 parser = argparse.ArgumentParser(description='Marble game parameters')
-parser.add_argument('-c','--config', help='Configuration file',default='demo')
+parser.add_argument('-c','--config', help='Configuration file',default='spoof_demo')
 parser.add_argument('-fs','--fullscreen', help='Fullscreen mode', action='store_true', default=False)
 parser.add_argument('-p','--perspective', help='Perspective mode', action='store_false', default=True)
 args = parser.parse_args()
@@ -127,8 +126,6 @@ class MarbleGame:
                      color=self.config['bg_color'], units='height',
                      fullscr=self.args.fullscreen, useFBO=self.perspective_on)
 
-        self.kb = KeyboardWrapper()
-
         self.warper = Warper(self.win,
             warp='warpfile',
             warpfile = 'config/perspective.data')
@@ -136,6 +133,13 @@ class MarbleGame:
         # add key controls
         event.globalKeys.add(key='q', modifiers=['alt'], func=self.quit)
         event.globalKeys.add(key='r', func=self.reset_course)
+        self.io = launchHubServer()
+        self.kb = self.io.devices.keyboard
+        self.left_key = ['a']
+        self.right_key = ['d']
+        self.key_codes = self.left_key+self.right_key
+        self.left_keydown = False
+        self.right_keydown = False
 
         # basic graphics and colors
         self.cue_color = self.config['cue_color']
@@ -178,14 +182,18 @@ class MarbleGame:
             fill_color=self.marble_shadow_color, line_color=self.marble_shadow_color,
             xpos=0, ypos=self.marble_base_ypos)
         self.marble_neutral_angle = 0
-        self.kb_neutral_angle = self.kb.config['neutral_angle']
         self.marble_trough_rad = 0.5*self.trough_width/np.sin(np.deg2rad(0.5*self.trough_full_angle))
+
+        self.marble_input_accel = self.config['marble_input_accel']
+        self.marble_gravity_accel = self.config['marble_gravity_accel']
+        self.marble_friction = self.config['marble_friction']
+        self.marble_input_direction = 0
 
         self.marble_angle = self.marble_neutral_angle
         self.marble_velocity = 0
         self.marble_xpos = 0
         self.marble_ypos = self.marble_base_ypos
-        self.angle_gain = self.config['kb_angle_gain']
+
         self.marble_rota_coef = self.config['marble_rota_coef']
 
         # course example
@@ -228,11 +236,32 @@ class MarbleGame:
         #     units='height',
         #     autoDraw=True)
 
-        # keyboard setup
-        self.kb.send_command('mode_action_mirror_rh')
-        self.display_hand = 'lh' # lh or rh
-
-        self.game_running = True
+    def check_keys(self):
+        events = self.kb.getKeys()
+        for kbe in events:
+            if kbe.key in self.key_codes:
+                if kbe.type == 'KEYBOARD_PRESS':
+                    if kbe.key in self.left_key:
+                        self.left_keydown = True
+                    elif kbe.key in self.right_key:
+                        self.right_keydown = True
+                elif kbe.type == 'KEYBOARD_RELEASE':
+                    if kbe.key in self.left_key:
+                        self.left_keydown = False
+                    elif kbe.key in self.right_key:
+                        self.right_keydown = False
+        if self.left_keydown:
+            if not(self.right_keydown):
+                self.marble_input_direction = -1
+            else:
+                self.marble_input_direction = 0
+        elif self.right_keydown:
+            if not(self.left_keydown):
+                self.marble_input_direction = 1
+            else:
+                self.marble_input_direction = 0
+        else:
+            self.marble_input_direction = 0
 
     def reset_course(self):
         self.course_example.pos = (0,0.5)
@@ -254,14 +283,12 @@ class MarbleGame:
 
     def update_marble(self):
         # update angular position
-        all_angle_raw = self.kb.all_pos[:]
-        all_vel_raw = self.kb.all_vel[:]
-        if self.display_hand == 'lh':
-            motor_idx = 1
-        else:
-            motor_idx = 0
-        self.marble_angle = all_angle_raw[motor_idx]*self.angle_gain
-        self.marble_velocity = all_vel_raw[motor_idx]*self.angle_gain
+        input_add_velocity = self.marble_input_direction*self.marble_input_accel*self.frame_time
+        friction_add_velocity = self.marble_velocity*self.marble_friction*self.frame_time
+        gravity_add_velocity = self.marble_angle*self.marble_gravity_accel*self.frame_time
+        self.marble_velocity = self.marble_velocity+input_add_velocity-gravity_add_velocity-friction_add_velocity 
+
+        self.marble_angle = self.marble_angle+self.marble_velocity*self.frame_time
 
         self.marble_xpos = self.marble_trough_rad*np.sin(np.deg2rad(self.marble_angle))
         self.marble_ypos = self.marble_base_ypos+self.marble_trough_rad*(1-np.cos(np.deg2rad(self.marble_angle)))
@@ -288,7 +315,8 @@ class MarbleGame:
 
     # main event loop
     def run_main_loop(self):
-        while self.game_running:
+        while True:
+            self.check_keys()
             self.update_frame_time()
             self.bg_grating.draw()
             self.lh_trough_rect.draw()
@@ -305,7 +333,6 @@ class MarbleGame:
             self.win.flip()
 
     def quit(self):
-        self.game_running = False
         core.quit()
 
 if __name__ == '__main__':

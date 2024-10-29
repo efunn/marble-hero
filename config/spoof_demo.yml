@@ -21,8 +21,10 @@ trough_edge_width: 0.04 # screen heights
 trough_full_angle: 90 # degrees
 marble_base_ypos: -0.35 # screen heights
 marble_rad: 0.03 # screen heights
-kb_angle_gain: 2.0 # finger angle to screen angle
 
 # speeds
 trough_speed: 0.25 # screen heights/sec
+marble_input_accel: 50 # degrees/sec/sec
+marble_gravity_accel: 2 # (degrees/sec/sec)/degree
+marble_friction: 0.5 # (degrees/sec)/(degrees/sec)
 marble_rota_coef: 1 # angular velocity coefficient
