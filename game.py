@@ -260,7 +260,7 @@ class MarbleGame:
             motor_idx = 1
         else:
             motor_idx = 0
-        self.marble_angle = all_angle_raw[motor_idx]*self.angle_gain
+        self.marble_angle = (all_angle_raw[motor_idx]-self.kb_neutral_angle)*self.angle_gain
         self.marble_velocity = all_vel_raw[motor_idx]*self.angle_gain
 
         self.marble_xpos = self.marble_trough_rad*np.sin(np.deg2rad(self.marble_angle))
