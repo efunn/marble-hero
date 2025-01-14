@@ -1,23 +1,24 @@
 # default config for robotic keyboard using Dynamixel U2D2 + X-series
 
 # USB communication
-port: 'COM3' # '/dev/cu.usbserial-FT7WBMX9'
+# port: 'COM3' # '/dev/cu.usbserial-FT7WBMX9'
+port: '/dev/cu.usbserial-FT8IST4W'
 baudrate: 3000000 # configure with Dynamixel Wizard 2.0
 
 # servo IDs and finger maps
-rh_ids: [101] # right hand Dynamixel IDs
-lh_ids: [201] # left hand Dynamixel IDs
+rh_ids: [102] # right hand Dynamixel IDs
+lh_ids: [101] # left hand Dynamixel IDs
 mirror_map_rh: 
-  101: 201
+  102: 101
 mirror_map_lh: 
-  201: 101
+  101: 102
 map_to_screen: [1,0] # map rh+lh to left-to-right
 
 # control and pressing logic
 stiff_params:
-  'P': 1000
-  'I': 100
-  'D': 1500
+  'P': 700 #1000
+  'I': 100 #100
+  'D': 1400 #1500
   'current': 910 
 compliant_params:
   'P': 150

@@ -1,0 +1,21 @@
+# default config for marble game demo
+
+# colors [r,g,b]; 1 = white, -1 = black
+bg_color: [-0.8,-0.8,-0.8]
+cue_color: [0.3,0.3,0.3]
+target_color: [-0.6,-0.6,-0.6]
+
+# screen dimensions
+screen_width: 1280 #1920 # pixels
+screen_height: 720 #1080 # pixels
+
+# positions
+task_radius: 0.75 # screen heights
+wedge_size: 1.5 # degrees
+target_pos: [-20, -10, 0, 10, 20]
+target_size: 5.0 # degrees
+wedge_corner_rad: 0.01 # screen heights
+target_corner_rad: 0.02 # screen heights
+wedge_height: 0.1 # screen heights
+target_height: 0.12 # screen heights
+kb_angle_gain: 2.0 # finger angle to screen angle

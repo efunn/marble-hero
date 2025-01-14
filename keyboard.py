@@ -81,6 +81,7 @@ class KeyboardWrapper(object):
         self.map_to_screen = self.config['map_to_screen']
         self.num_fingers = len(self.map_to_screen)
         self.all_pos = multiprocessing.Array('f',self.num_fingers)
+        self.all_vel = multiprocessing.Array('f',self.num_fingers)
 
         # command logic
         self.command_pipe_recv, self.command_pipe_send = multiprocessing.Pipe(duplex=False)
@@ -89,7 +90,7 @@ class KeyboardWrapper(object):
         # start async keyboard process
         wait_for_start = multiprocessing.Event()
         self.keyboard_process = multiprocessing.Process(target=main_keyboard_loop,
-            args=(self.config, self.all_pos, self.command_pipe_recv, wait_for_start))
+            args=(self.config, self.all_pos, self.all_vel, self.command_pipe_recv, wait_for_start))
         self.keyboard_process.start()
         wait_for_start.wait()
 
@@ -116,7 +117,7 @@ class KeyboardWrapper(object):
 
 # keyboard class to run in child process
 class KeyboardAsync(object):
-    def __init__(self, config_object, all_pos, command_pipe_recv):
+    def __init__(self, config_object, all_pos, all_vel, command_pipe_recv):
         # load config
         self.config = config_object
 
@@ -155,7 +156,7 @@ class KeyboardAsync(object):
         self.command_pipe_recv = command_pipe_recv
         self.all_pos = all_pos
         self.all_time = np.full(self.num_fingers, 0, dtype='i')
-        self.all_vel = np.full(self.num_fingers, 0, dtype='f')
+        self.all_vel = all_vel #np.full(self.num_fingers, 0, dtype='f')
 
         # recording
         self.recording = False
@@ -409,9 +410,9 @@ class KeyboardAsync(object):
     def shutdown(self):
         self.keyboard_running = False
 
-def main_keyboard_loop(config_object, all_pos, command_pipe_recv, wait_for_start):
+def main_keyboard_loop(config_object, all_pos, all_vel, command_pipe_recv, wait_for_start):
     # create keyboard object inside child process
-    kb = KeyboardAsync(config_object, all_pos, command_pipe_recv)
+    kb = KeyboardAsync(config_object, all_pos, all_vel, command_pipe_recv)
     wait_for_start.set()
 
     # init time

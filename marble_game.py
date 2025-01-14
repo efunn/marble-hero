@@ -189,7 +189,7 @@ class MarbleGame:
         self.marble_rota_coef = self.config['marble_rota_coef']
 
         # course example
-        self.target_time_spacing = 1.5
+        self.target_time_spacing = 1.0 #1.5
         self.start_end_time_spacing = 0.5
         # self.targets = [15,-35,-15,-25,30,15,5,-20]
         self.targets = [25,-35,15,-15,30]
@@ -262,6 +262,10 @@ class MarbleGame:
             motor_idx = 0
         self.marble_angle = (all_angle_raw[motor_idx]-self.kb_neutral_angle)*self.angle_gain
         self.marble_velocity = all_vel_raw[motor_idx]*self.angle_gain
+
+        if self.display_hand == 'lh':
+            self.marble_angle = -self.marble_angle
+            self.marble_velocity = -self.marble_velocity
 
         self.marble_xpos = self.marble_trough_rad*np.sin(np.deg2rad(self.marble_angle))
         self.marble_ypos = self.marble_base_ypos+self.marble_trough_rad*(1-np.cos(np.deg2rad(self.marble_angle)))
